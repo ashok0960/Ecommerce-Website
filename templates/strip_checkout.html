@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+
+{% block main-content %}
+<section class="container my-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4>Order Summary</h4>
+                </div>
+                <div class="card-body">
+                    <div class="order-item mb-4">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <img src="{{ order.product.image }}" alt="{{ order.product.title }}" class="img-fluid border">
+                            </div>
+                            <div class="col-md-9">
+                                <h5>{{ order.product.title }}</h5>
+                                <p class="text-muted">{{ order.product.s_description }}</p>
+                                <hr>
+                                <p><strong>Price per unit:</strong> Rs. {{ order.product.discounted_price }}</p>
+                                <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+                                <p><strong>Delivery Address:</strong> {{ order.address }}</p>
+                                <p><strong>Email:</strong> {{ order.email }}</p>
+                                <p><strong>Phone:</strong> {{ order.phone }}</p>
+                                <hr>
+                                <h5><strong>Total Amount: Rs. {{ order.total_price }}</strong></h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <p>Click the button below to proceed to the secure Stripe payment gateway</p>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="/create-checkout-session/{{ order.id }}/{{ cart.id }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-lock"></i> Proceed to Payment
+                        </a>
+                        <a href="{% url 'cart' %}" class="btn btn-secondary btn-lg ms-2">
+                            <i class="fas fa-arrow-left"></i> Back to Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

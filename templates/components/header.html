@@ -1,0 +1,131 @@
+{% load static %}
+<header>
+    <nav class="navbar navbar-expand-lg px-4 py-2">
+
+        <div class="container-fluid">
+
+            <!-- LEFT: LOGO -->
+            <a class="navbar-brand d-flex align-items-center gap-2"
+               href="{% if user.is_staff %}{% url 'all-products' %}{% else %}{% url 'home' %}{% endif %}">
+                <img src="{% static 'images/logo.jpg' %}" width="44" height="44" class="rounded-circle">
+                <span style="font-family:'Montserrat',sans-serif;font-weight:800;color:var(--primary);font-size:1.1rem;">
+                    Ashok Store
+                </span>
+            </a>
+
+            <!-- MOBILE TOGGLER -->
+            <button class="navbar-toggler border-0" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarScroll">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- COLLAPSIBLE CONTENT -->
+            <div class="collapse navbar-collapse" id="navbarScroll">
+
+                <!-- RIGHT SECTION WRAPPER -->
+                <div class="ms-auto d-flex flex-column flex-lg-row align-items-lg-center gap-3">
+
+                    <!-- ================= MENU ================= -->
+
+                    {% if user.is_authenticated and user.is_staff %}
+
+                        <ul class="navbar-nav d-flex flex-column flex-lg-row gap-2 mb-0">
+
+                            {% if user.is_superuser %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'admin-dashboard' %}">
+                                    <i class="bi bi-speedometer2"></i> Dashboard
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'vendor-dashboard' %}">
+                                    <i class="bi bi-speedometer2"></i> Dashboard
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'all-products' %}">
+                                    <i class="bi bi-box-seam-fill"></i> Products
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'all-category' %}">
+                                    <i class="bi bi-grid-fill"></i> Categories
+                                </a>
+                            </li>
+                            
+
+                            {% if user.is_superuser %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'admin:index' %}">
+                                    <i class="bi bi-shield-lock-fill"></i> Admin
+                                </a>
+                            </li>
+                            {% endif %}
+
+                        </ul>
+
+                    {% else %}
+
+                        <ul class="navbar-nav d-flex flex-column flex-lg-row gap-2 mb-0">
+
+                            <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'products' %}">Products</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'cart' %}">Cart</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'my-orders' %}">My Orders</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li>
+
+                        </ul>
+
+                    {% endif %}
+
+                    <!-- ================= USER SECTION ================= -->
+
+                    <div class="d-flex align-items-center gap-2">
+
+                        {% if user.is_authenticated %}
+
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-dark dropdown-toggle"
+                                        data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle"></i> {{ user.username }}
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+
+                                    {% if user.is_staff %}
+                                    <li><a class="dropdown-item" href="{% url 'all-products' %}">My Products</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'all-category' %}">My Categories</a></li>
+                                    {% if user.is_superuser %}
+                                    <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin Panel</a></li>
+                                    {% endif %}
+                                    {% else %}
+                                    <li><a class="dropdown-item" href="{% url 'my-orders' %}">My Orders</a></li>
+                                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                                    {% endif %}
+
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Logout</a></li>
+
+                                </ul>
+                            </div>
+
+                        {% else %}
+
+                            <a href="{% url 'register' %}" class="btn btn-dark btn-sm">Register</a>
+                            <a href="{% url 'login' %}" class="btn btn-light btn-sm">Login</a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </nav>
+</header>

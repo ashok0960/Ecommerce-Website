@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Update Category{% endblock %}
+
+{% block main-content %}
+{% include "components/messages.html" %}
+<div class="container my-5">
+    <div class="col-md-5 m-auto bg-white rounded-4 shadow-sm p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0" style="color:var(--primary)">✏️ Update Category</h4>
+            <a href="{% url 'all-category' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Back</a>
+        </div>
+        <hr>
+        <form method="post">
+            {% csrf_token %}
+            {{form|crispy}}
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                <a href="{% url 'all-category' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

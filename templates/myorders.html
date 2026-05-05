@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}My Orders{% endblock %}
+
+{% block main-content %}
+{% include "components/messages.html" %}
+
+<div class="container my-5">
+    <h2 class="section-title">📦 My Orders</h2>
+
+    {% if orders %}
+    <div class="bg-white rounded-4 shadow-sm overflow-hidden">
+        <table class="cart-table w-100">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in orders %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" width="50" height="50" style="border-radius:8px;object-fit:cover">
+                            <span class="fw-600" style="font-size:0.9rem">{{ item.product.title|slice:':25' }}</span>
+                        </div>
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td class="fw-bold" style="color:var(--success)">${{ item.total_price }}</td>
+                    <td>
+                        <span class="badge" style="background:rgba(111,73,1,0.1);color:var(--primary)">{{ item.payment_method }}</span>
+                    </td>
+                    <td>
+                        {% if item.order_status == "In Progress" %}
+                        <span class="badge" style="background:rgba(245,166,35,0.15);color:#b45309">⏳ In Progress</span>
+                        {% elif item.order_status == "way to deliver" %}
+                        <span class="badge" style="background:rgba(59,130,246,0.15);color:#1d4ed8">🚚 On the Way</span>
+                        {% elif item.order_status == "Complete" %}
+                        <span class="badge" style="background:rgba(16,185,129,0.15);color:var(--success)">✅ Completed</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ item.order_status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted" style="font-size:0.85rem">{{ item.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <div style="font-size:5rem">📦</div>
+        <h4 class="mt-3 fw-bold">No orders yet</h4>
+        <p class="text-muted">You haven't placed any orders. Start shopping!</p>
+        <a href="{% url 'products' %}" class="btn btn-primary mt-2 px-4">Browse Products</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

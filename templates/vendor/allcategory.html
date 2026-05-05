@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}All Categories{% endblock %}
+
+{% block main-content %}
+{% include "components/messages.html" %}
+<div class="container my-5">
+    <div class="bg-white rounded-4 shadow-sm p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0" style="color:var(--primary)">🗂️ All Categories</h4>
+            <div class="d-flex gap-2">
+                <a href="{% url 'all-products' %}" class="btn btn-outline-secondary btn-sm">Products</a>
+                <a href="{% url 'add-category' %}" class="btn btn-primary btn-sm">+ Add Category</a>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="cart-table w-100">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Created At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in categories %}
+                    <tr>
+                        <td>{{forloop.counter}}</td>
+                        <td class="fw-600">{{item.name}}</td>
+                        <td class="text-muted" style="font-size:0.85rem">{{item.created_at|date:"M d, Y"}}</td>
+                        <td>
+                            <a href="{% url 'update-category' item.id %}" class="btn btn-sm btn-primary me-1"><i class="bi bi-pencil"></i></a>
+                            <form method="post" action="{% url 'delete-category' item.id %}" class="d-inline" onsubmit="return confirm('Delete this category?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center text-muted py-4">No categories found. <a href="{% url 'add-category' %}">Add one</a></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

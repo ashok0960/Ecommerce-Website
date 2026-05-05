@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Login{% endblock %}
+
+{% block main-content %}
+{% include "components/messages.html" %}
+
+<div class="auth-wrapper">
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <div class="auth-logo-wrap">
+                {% load static %}
+                <img src="{% static 'images/logo.jpg' %}" alt="Logo" width="64" class="rounded-circle mb-3" style="border:3px solid var(--accent)">
+            </div>
+            <h2 class="auth-brand">Ashok Store</h2>
+            <p class="auth-tagline">Your trusted destination for quality products at unbeatable prices.</p>
+            <div class="auth-features">
+                <div class="auth-feature-item"><span>🚚</span> Free shipping on orders over $50</div>
+                <div class="auth-feature-item"><span>🔒</span> 100% secure payments</div>
+                <div class="auth-feature-item"><span>↩️</span> Easy 30-day returns</div>
+                <div class="auth-feature-item"><span>🎧</span> 24/7 customer support</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-right">
+        <div class="auth-card" id="loginform">
+            <div class="text-center mb-4">
+                <div class="auth-icon-circle">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h3 class="auth-title mt-3">Welcome Back!</h3>
+                <p class="text-muted small">Sign in to your account to continue</p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mt-2">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+            </form>
+
+            <div class="auth-divider"><span>or</span></div>
+
+            <div class="text-center">
+                <p class="text-muted small mb-0">Don't have an account?
+                    <a href="{% url 'register' %}" class="auth-link fw-bold">Create one free</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

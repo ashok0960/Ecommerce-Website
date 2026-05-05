@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}Vendor Dashboard{% endblock %}
+
+{% block main-content %}
+<div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div style="padding: 0 20px; margin-bottom: 1.5rem;">
+            <h6 style="color: var(--primary); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">Menu</h6>
+        </div>
+        <a href="{% url 'vendor-dashboard' %}" class="sidebar-item active">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{% url 'all-products' %}" class="sidebar-item">
+            <i class="bi bi-box-seam"></i>
+            <span>Products</span>
+        </a>
+        <a href="{% url 'add-product' %}" class="sidebar-item">
+            <i class="bi bi-plus-circle"></i>
+            <span>Add Product</span>
+        </a>
+        <a href="{% url 'all-category' %}" class="sidebar-item">
+            <i class="bi bi-collection"></i>
+            <span>Categories</span>
+        </a>
+        <a href="{% url 'add-category' %}" class="sidebar-item">
+            <i class="bi bi-plus-circle"></i>
+            <span>Add Category</span>
+        </a>
+        <hr style="margin: 1.5rem 0; border-color: var(--border);">
+        <div style="padding: 0 20px; margin-bottom: 1.5rem;">
+            <h6 style="color: var(--primary); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">Help</h6>
+        </div>
+        <a href="{% url 'about' %}" class="sidebar-item">
+            <i class="bi bi-info-circle"></i>
+            <span>Help Center</span>
+        </a>
+        <a href="{% url 'contact' %}" class="sidebar-item">
+            <i class="bi bi-chat-dots"></i>
+            <span>Support</span>
+        </a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-content">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">📊 Vendor Dashboard</h1>
+                <p class="dashboard-subtitle">Welcome back! Here's your store overview</p>
+            </div>
+            <a href="{% url 'add-product' %}" class="btn btn-primary" style="height: fit-content;">
+                <i class="bi bi-plus-lg me-2"></i>Add New Product
+            </a>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="stat-label">Total Products</div>
+                <div class="stat-number">{{ total_products }}</div>
+                <div class="stat-change positive">
+                    <i class="bi bi-arrow-up"></i> Active
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-icon">
+                    <i class="bi bi-collection"></i>
+                </div>
+                <div class="stat-label">Categories</div>
+                <div class="stat-number">{{ total_categories }}</div>
+                <div class="stat-change positive">
+                    <i class="bi bi-arrow-up"></i> Organized
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f5a623, #ffd97d);">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <div class="stat-label">Low Stock</div>
+                <div class="stat-number">{{ low_stock }}</div>
+                <div class="stat-change {% if low_stock > 0 %}negative{% else %}positive{% endif %}">
+                    {% if low_stock > 0 %}
+                    <i class="bi bi-arrow-up"></i> Need attention
+                    {% else %}
+                    <i class="bi bi-check-circle"></i> All good
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);">
+                    <i class="bi bi-x-circle"></i>
+                </div>
+                <div class="stat-label">Out of Stock</div>
+                <div class="stat-number">{{ out_of_stock }}</div>
+                <div class="stat-change {% if out_of_stock > 0 %}negative{% else %}positive{% endif %}">
+                    {% if out_of_stock > 0 %}
+                    <i class="bi bi-arrow-up"></i> Restock needed
+                    {% else %}
+                    <i class="bi bi-check-circle"></i> None
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #6ee7b7);">
+                    <i class="bi bi-fire"></i>
+                </div>
+                <div class="stat-label">Trending</div>
+                <div class="stat-number">{{ trending_products }}</div>
+                <div class="stat-change positive">
+                    <i class="bi bi-star"></i> Hot items
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <div class="stat-label">Growth</div>
+                <div class="stat-number">+12%</div>
+                <div class="stat-change positive">
+                    <i class="bi bi-arrow-up"></i> This month
+                </div>
+            </div>
+        </div>
+
+        {% include "components/messages.html" %}
+
+        <!-- Recent Products -->
+        <div class="dashboard-box">
+            <div class="dashboard-box-header">
+                <h2 class="dashboard-box-title">
+                    <i class="bi bi-clock-history"></i>
+                    Recent Products
+                </h2>
+                <a href="{% url 'all-products' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="dashboard-box-content">
+                {% if recent_products %}
+                <div class="product-grid">
+                    {% for product in recent_products %}
+                    <div class="product-grid-item">
+                        <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                        <div class="product-grid-item-info">
+                            <div class="product-grid-item-name" title="{{ product.title }}">
+                                {{ product.title|truncatewords:3 }}
+                            </div>
+                            <div class="product-grid-item-price">${{ product.discounted_price }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                <i class="bi bi-box-seam"></i> {{ product.stock }} in stock
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <div class="empty-state-title">No Products Yet</div>
+                    <p class="empty-state-text">Start by adding your first product to your store</p>
+                    <a href="{% url 'add-product' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-2"></i>Add Product
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-box">
+            <div class="dashboard-box-header">
+                <h2 class="dashboard-box-title">
+                    <i class="bi bi-lightning"></i>
+                    Quick Actions
+                </h2>
+            </div>
+            <div class="dashboard-box-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <a href="{% url 'add-product' %}" class="btn btn-primary" style="padding: 12px 20px; border-radius: 12px; text-align: center; text-decoration: none;">
+                        <i class="bi bi-plus-circle me-2"></i>Add Product
+                    </a>
+                    <a href="{% url 'add-category' %}" class="btn btn-outline-primary" style="padding: 12px 20px; border-radius: 12px; text-align: center; text-decoration: none;">
+                        <i class="bi bi-plus-circle me-2"></i>Add Category
+                    </a>
+                    <a href="{% url 'all-products' %}" class="btn btn-outline-primary" style="padding: 12px 20px; border-radius: 12px; text-align: center; text-decoration: none;">
+                        <i class="bi bi-eye me-2"></i>View Products
+                    </a>
+                    <a href="{% url 'all-category' %}" class="btn btn-outline-primary" style="padding: 12px 20px; border-radius: 12px; text-align: center; text-decoration: none;">
+                        <i class="bi bi-collection me-2"></i>View Categories
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+    .btn-outline-primary {
+        color: var(--primary) !important;
+        border-color: var(--primary) !important;
+        background: transparent;
+    }
+    .btn-outline-primary:hover {
+        background: var(--primary) !important;
+        color: #fff !important;
+    }
+</style>
+{% endblock %}

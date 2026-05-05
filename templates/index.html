@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Home{% endblock %}
+
+{% block main-content %}
+{% include "components/messages.html" %}
+
+<!-- Banner -->
+<div id="banner">
+    <div id="heroBanner" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroBanner" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#heroBanner" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#heroBanner" data-bs-slide-to="2"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active" style="position:relative">
+                <img src="{% static 'images/b1.jpg' %}" class="d-block w-100" alt="Banner">
+                <div style="position:absolute;bottom:30px;left:40px;z-index:10">
+                    <a href="{% url 'products' %}" class="btn btn-warning px-4 py-2 mt-2 fw-bold">Shop Now <i class="bi bi-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'images/b2.jpg' %}" class="d-block w-100" alt="Banner">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'images/b3.jpg' %}" class="d-block w-100" alt="Banner">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroBanner" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroBanner" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+</div>
+
+<!-- Hero Text Section -->
+<div class="px-4 px-md-5 mt-4 mb-2">
+    <div class="hero-text-card">
+        <div class="hero-circle hero-circle-1"></div>
+        <div class="hero-circle hero-circle-2"></div>
+        <div class="hero-circle hero-circle-3"></div>
+        <div class="row align-items-center g-4">
+            <div class="col-md-7">
+                <span class="hero-badge">🛍️ New Collection 2024</span>
+                <h1 class="hero-title mt-3">Shop the <span class="hero-accent">Best Deals</span></h1>
+                <p class="hero-subtitle">Discover trending products at unbeatable prices.<br>Quality you can trust, prices you'll love.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'products' %}" class="btn hero-btn-primary fw-bold">
+                        <i class="bi bi-bag-fill me-2"></i>Shop Now
+                    </a>
+                    <a href="{% url 'about' %}" class="btn hero-btn-outline fw-bold">
+                        <i class="bi bi-info-circle me-2"></i>Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">500+</span>
+                        <span class="hero-stat-label">Products</span>
+                    </div>
+                    <div class="hero-divider"></div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">10K+</span>
+                        <span class="hero-stat-label">Happy Customers</span>
+                    </div>
+                    <div class="hero-divider"></div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">99%</span>
+                        <span class="hero-stat-label">Satisfaction</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trending Items -->
+<div class="my-5 px-4 px-md-5" id="trending">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title mb-0">🔥 Trending Items</h2>
+        <a href="{% url 'products' %}" class="btn btn-primary btn-sm px-4">View All</a>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+        {% for item in products %}
+        <div class="col">
+            <a href="{% url 'productdetails' item.id %}" class="text-decoration-none text-dark">
+                <div class="card shadow-sm">
+                    <div style="overflow:hidden;height:240px;">
+                        <img src="{{item.image.url}}" class="card-img-top w-100 h-100" style="object-fit:cover" alt="{{item.title}}">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" title="{{item.title}}">{{item.title|slice:':22'}}{% if item.title|length >= 22 %}...{% endif %}</h5>
+                        <p class="card-text mb-1">
+                            <small class="text-decoration-line-through text-muted">${{item.actual_price}}</small>
+                            <span class="fw-bold ms-1" style="color:var(--success)">${{item.discounted_price}}</span>
+                        </p>
+                        <span class="text-decoration-none" style="color:var(--primary);font-size:0.85rem;font-weight:600">View Details →</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- New Arrivals -->
+<div id="newArrivals">
+    <div class="container-fluid px-4 px-md-5">
+        <h2 class="section-title">✨ New Arrivals</h2>
+        <div class="row align-items-center g-5">
+            <div class="col-md-5">
+                <swiper-container class="mySwiper" pagination="true" effect="cube" grab-cursor="true"
+                    cube-effect-shadow="true" cube-effect-slide-shadows="true"
+                    cube-effect-shadow-offset="20" cube-effect-shadow-scale="0.94" autoplay="true">
+                    {% for item in products %}
+                    <swiper-slide>
+                        <img src="{{item.image.url}}" alt="{{item.title}}" loading="lazy" />
+                    </swiper-slide>
+                    {% endfor %}
+                </swiper-container>
+            </div>
+            <div class="col-md-7">
+                <h3 style="font-family:'Montserrat',sans-serif;font-weight:700;color:var(--primary-dark)">Fresh Picks Just for You</h3>
+                <p class="text-muted mb-4">Explore our latest collection of handpicked products, curated for quality and style.</p>
+                <div class="accordion" id="accordionArrivals">
+                    <div class="accordion-item border-0 mb-2 rounded-3 shadow-sm">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button rounded-3 fw-600" type="button" data-bs-toggle="collapse" data-bs-target="#arr1">
+                                🎯 Premium Quality
+                            </button>
+                        </h2>
+                        <div id="arr1" class="accordion-collapse collapse show" data-bs-parent="#accordionArrivals">
+                            <div class="accordion-body text-muted">All products are sourced from verified suppliers ensuring top-notch quality and durability.</div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 mb-2 rounded-3 shadow-sm">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed rounded-3 fw-600" type="button" data-bs-toggle="collapse" data-bs-target="#arr2">
+                                💰 Best Prices
+                            </button>
+                        </h2>
+                        <div id="arr2" class="accordion-collapse collapse" data-bs-parent="#accordionArrivals">
+                            <div class="accordion-body text-muted">We offer competitive pricing with regular discounts and exclusive deals for our customers.</div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 mb-2 rounded-3 shadow-sm">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed rounded-3 fw-600" type="button" data-bs-toggle="collapse" data-bs-target="#arr3">
+                                🚀 Fast Delivery
+                            </button>
+                        </h2>
+                        <div id="arr3" class="accordion-collapse collapse" data-bs-parent="#accordionArrivals">
+                            <div class="accordion-body text-muted">Get your orders delivered quickly with our reliable shipping partners across the country.</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="{% url 'products' %}" class="btn btn-primary mt-4 px-4">Explore All Products <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-element-bundle.min.js"></script>
+{% endblock %}

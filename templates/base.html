@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}{% endblock  %} | Ashok Ecommerce</title>
+
+    <!-- CDN link for Bootstrap -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"> -->
+     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+    <!-- Favicons -->
+     <link rel="shortcut icon" href="{{ecom.favicon}}" type="image/x-icon">
+
+    <!-- CDN link for Web Icons and fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS Link -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- CDN link for Swiper Js -->
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css"/>
+
+</head>
+<body>
+
+    {% include "components/header.html" %}
+    
+    {% block main-content %}
+    {% include "components/messages.html" %}
+    
+    {% endblock %}
+    {% include "components/footer.html" %}
+
+    <!-- ===== CHATBOT & SUPPORT WIDGET ===== -->
+    <div id="chat-widget">
+        <!-- Support Button (always visible) -->
+        <button id="chat-toggle-btn" onclick="toggleChat()" title="Chat with us">
+            <i class="bi bi-chat-dots-fill" id="chat-icon"></i>
+            <i class="bi bi-x-lg" id="chat-close-icon" style="display:none"></i>
+            <span class="chat-badge" id="chat-badge">1</span>
+        </button>
+
+        <!-- Chat Window -->
+        <div id="chat-window" style="display:none">
+            <div id="chat-header">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;">🛍️</div>
+                    <div>
+                        <div style="font-weight:700;font-size:0.95rem;">Ashok Store Support</div>
+                        <div style="font-size:0.75rem;opacity:0.8;">🟢 Online - Reply instantly</div>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div id="chat-messages">
+                <div class="chat-msg bot">
+                    <div class="chat-bubble">👋 Hi! Welcome to <strong>Ashok Store</strong>! I'm here to help you with orders, payments, shipping, and more. What can I do for you?</div>
+                </div>
+                <div class="chat-msg bot">
+                    <div class="chat-bubble" style="background:#f0f0f0;">
+                        <strong>Quick questions:</strong><br>
+                        <button class="quick-btn" onclick="sendQuick('track my order')">📦 Track Order</button>
+                        <button class="quick-btn" onclick="sendQuick('payment help')">💳 Payment</button>
+                        <button class="quick-btn" onclick="sendQuick('shipping info')">🚚 Shipping</button>
+                        <button class="quick-btn" onclick="sendQuick('return refund')">↩️ Returns</button>
+                    </div>
+                </div>
+            </div>
+            <div id="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Type your message..." onkeypress="if(event.key==='Enter')sendMessage()">
+                <button onclick="sendMessage()" id="chat-send-btn"><i class="bi bi-send-fill"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    #chat-widget {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        z-index: 9999;
+        font-family: 'Nunito', sans-serif;
+    }
+    #chat-toggle-btn {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6f4901, #f5a623);
+        border: none;
+        color: #fff;
+        font-size: 1.4rem;
+        cursor: pointer;
+        box-shadow: 0 6px 24px rgba(111,73,1,0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        position: relative;
+    }
+    #chat-toggle-btn:hover { transform: scale(1.1); box-shadow: 0 8px 30px rgba(111,73,1,0.55); }
+    .chat-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 800;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #fff;
+    }
+    #chat-window {
+        position: absolute;
+        bottom: 70px;
+        right: 0;
+        width: 340px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+        overflow: hidden;
+        animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+        from { opacity:0; transform:translateY(20px); }
+        to { opacity:1; transform:translateY(0); }
+    }
+    #chat-header {
+        background: linear-gradient(135deg, #6f4901, #a06a10);
+        color: #fff;
+        padding: 14px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #chat-messages {
+        height: 300px;
+        overflow-y: auto;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: #faf8f5;
+    }
+    #chat-messages::-webkit-scrollbar { width: 4px; }
+    #chat-messages::-webkit-scrollbar-thumb { background: #d1c4a8; border-radius: 4px; }
+    .chat-msg { display: flex; }
+    .chat-msg.user { justify-content: flex-end; }
+    .chat-msg.bot { justify-content: flex-start; }
+    .chat-bubble {
+        max-width: 80%;
+        padding: 10px 14px;
+        border-radius: 16px;
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+    .chat-msg.user .chat-bubble {
+        background: linear-gradient(135deg, #6f4901, #a06a10);
+        color: #fff;
+        border-bottom-right-radius: 4px;
+    }
+    .chat-msg.bot .chat-bubble {
+        background: #fff;
+        color: #1a1a1a;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .quick-btn {
+        display: inline-block;
+        margin: 3px 2px;
+        padding: 4px 10px;
+        background: #fff;
+        border: 1.5px solid #6f4901;
+        color: #6f4901;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .quick-btn:hover { background: #6f4901; color: #fff; }
+    #chat-input-area {
+        display: flex;
+        padding: 12px;
+        gap: 8px;
+        border-top: 1px solid #e5e7eb;
+        background: #fff;
+    }
+    #chat-input {
+        flex: 1;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 24px;
+        padding: 8px 16px;
+        font-size: 0.88rem;
+        outline: none;
+        font-family: 'Nunito', sans-serif;
+        transition: border-color 0.2s;
+    }
+    #chat-input:focus { border-color: #6f4901; }
+    #chat-send-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6f4901, #f5a623);
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    #chat-send-btn:hover { transform: scale(1.1); }
+    .typing-indicator span {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #6f4901;
+        margin: 0 2px;
+        animation: bounce 1.2s infinite;
+    }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+        0%,60%,100% { transform: translateY(0); }
+        30% { transform: translateY(-6px); }
+    }
+    @media (max-width: 480px) {
+        #chat-window { width: 300px; right: -10px; }
+        #chat-widget { bottom: 20px; right: 16px; }
+    }
+    </style>
+
+    <script>
+    function toggleChat() {
+        const win = document.getElementById('chat-window');
+        const badge = document.getElementById('chat-badge');
+        const icon = document.getElementById('chat-icon');
+        const closeIcon = document.getElementById('chat-close-icon');
+        const isOpen = win.style.display !== 'none';
+        win.style.display = isOpen ? 'none' : 'block';
+        icon.style.display = isOpen ? 'inline' : 'none';
+        closeIcon.style.display = isOpen ? 'none' : 'inline';
+        if (!isOpen) { badge.style.display = 'none'; scrollToBottom(); }
+    }
+
+    function scrollToBottom() {
+        const msgs = document.getElementById('chat-messages');
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function appendMsg(text, sender) {
+        const msgs = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = `chat-msg ${sender}`;
+        div.innerHTML = `<div class="chat-bubble">${text}</div>`;
+        msgs.appendChild(div);
+        scrollToBottom();
+    }
+
+    function showTyping() {
+        const msgs = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'chat-msg bot';
+        div.id = 'typing-indicator';
+        div.innerHTML = '<div class="chat-bubble typing-indicator"><span></span><span></span><span></span></div>';
+        msgs.appendChild(div);
+        scrollToBottom();
+        return div;
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const msg = input.value.trim();
+        if (!msg) return;
+        appendMsg(msg, 'user');
+        input.value = '';
+        const typing = showTyping();
+        fetch('/chatbot', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+            body: JSON.stringify({message: msg})
+        })
+        .then(r => r.json())
+        .then(data => {
+            typing.remove();
+            appendMsg(data.reply, 'bot');
+        })
+        .catch(() => {
+            typing.remove();
+            appendMsg('Sorry, I could not connect. Please try again.', 'bot');
+        });
+    }
+
+    function sendQuick(msg) {
+        document.getElementById('chat-input').value = msg;
+        sendMessage();
+    }
+
+    function getCookie(name) {
+        let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+        return v ? v[2] : null;
+    }
+    </script>
+    <!-- ===== END CHATBOT WIDGET ===== -->
+
+    {% block script %}
+
+    {% endblock %}
+
+    
+    <!-- Sweet Alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- CDN script for bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+</body>
+</html>

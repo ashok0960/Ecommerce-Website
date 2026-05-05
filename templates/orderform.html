@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Order Form{% endblock  %}
+
+
+{% block main-content %}
+{% include "components/messages.html" %}
+<div class="container my-5">
+    <div class="col-md-5 m-auto shadow p-4">
+        <h3 class='text-center'>Order Form</h3>
+        <hr>
+        <form action="#" method='post'>
+            {% csrf_token %}
+            {{form | crispy}}
+            
+            <input type="submit" value='CheckOut' class='btn btn-success my-2'>
+        </form>
+    </div>
+</div>
+
+{% endblock  %}
