@@ -122,6 +122,49 @@
             </div>
         </div>
 
+        <div class="dashboard-box">
+            <div class="dashboard-box-header">
+                <h2 class="dashboard-box-title">
+                    <i class="bi bi-clipboard-check"></i>
+                    Orders to Manage
+                </h2>
+                <a href="{% url 'manage-orders' %}" class="btn btn-sm btn-outline-primary">View Orders</a>
+            </div>
+            <div class="dashboard-box-content">
+                <p class="mb-2">Orders requiring updates: <strong>{{ orders_to_manage|length }}</strong></p>
+                {% if orders_to_manage %}
+                <div class="table-responsive">
+                    <table class="dashboard-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Product</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders_to_manage|slice:':5' %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.product.title|truncatewords:3 }}</td>
+                                <td>{{ order.order_status }}</td>
+                                <td>{{ order.created_at|date:"M d" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">✅</div>
+                    <div class="empty-state-title">No pending orders</div>
+                    <p class="empty-state-text">All admin-product orders are up to date.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
         {% include "components/messages.html" %}
 
         <!-- Recent Products -->

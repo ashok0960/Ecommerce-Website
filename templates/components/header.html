@@ -56,7 +56,18 @@
                                     <i class="bi bi-grid-fill"></i> Categories
                                 </a>
                             </li>
-                            
+
+                            <li class="nav-item">
+                                <a class="nav-link position-relative" href="{% url 'manage-orders' %}" id="orders-link">
+                                    <i class="bi bi-box-seam-fill"></i> Orders
+                                    {% if pending_orders_count > 0 %}
+                                    <span class="badge bg-danger position-absolute top-0 end-0" id="order-badge" style="font-size: 0.7rem;">
+                                        {{ pending_orders_count }}
+                                    </span>
+                                    {% endif %}
+                                </a>
+                            </li>
+
 
                             {% if user.is_superuser %}
                             <li class="nav-item">
@@ -104,8 +115,9 @@
                                     <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin Panel</a></li>
                                     {% endif %}
                                     {% else %}
-                                    <li><a class="dropdown-item" href="{% url 'my-orders' %}">My Orders</a></li>
-                                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'my-orders' %}"><i class="bi bi-bag-check me-2"></i>My Orders</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'wishlist' %}"><i class="bi bi-heart me-2"></i>Wishlist</a></li>
                                     {% endif %}
 
                                     <li><hr class="dropdown-divider"></li>
@@ -129,3 +141,52 @@
         </div>
     </nav>
 </header>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const orderLink = document.getElementById('orders-link');
+    if (!orderLink) return;
+
+    const updateOrderCount = async () => {
+        try {
+            const response = await fetch('{% url "pending-orders-count" %}');
+            const data = await response.json();
+
+            if (data.success && data.count !== undefined) {
+                const badge = document.getElementById('order-badge');
+                const currentCount = badge ? parseInt(badge.textContent) : 0;
+
+                if (data.count > 0) {
+                    if (!badge) {
+                        const newBadge = document.createElement('span');
+                        newBadge.id = 'order-badge';
+                        newBadge.className = 'badge bg-danger position-absolute top-0 end-0';
+                        newBadge.style.fontSize = '0.7rem';
+                        newBadge.textContent = data.count;
+                        orderLink.appendChild(newBadge);
+                    } else if (currentCount !== data.count) {
+                        badge.textContent = data.count;
+                        badge.style.animation = 'pulse 0.5s ease-in-out';
+                        setTimeout(() => {
+                            badge.style.animation = '';
+                        }, 500);
+                    }
+                } else if (badge) {
+                    badge.remove();
+                }
+            }
+        } catch (error) {
+            console.debug('Could not update order count');
+        }
+    };
+
+    setInterval(updateOrderCount, 30000);
+});
+</script>
+
+<style>
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+</style>

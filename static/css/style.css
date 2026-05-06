@@ -453,6 +453,28 @@ header .btn-info {
     font-weight: 600;
 }
 
+/* ===== UTILITIES ===== */
+.fw-600 { font-weight: 600 !important; }
+
+/* ===== PAGINATION ===== */
+.pagination .page-link {
+    border: 1.5px solid var(--border);
+    color: var(--primary);
+    font-weight: 600;
+    padding: 8px 14px;
+    transition: all var(--transition);
+}
+.pagination .page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+.pagination .page-link:hover {
+    background: rgba(111,73,1,0.08);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
 /* ===== FOOTER ===== */
 footer {
     background: #1a1208 !important;

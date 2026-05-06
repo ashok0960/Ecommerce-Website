@@ -17,4 +17,5 @@ admin.site.register(Setting, AdminSetting)
 admin.site.register(Cart)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Contact, ContactAdmin)
+admin.site.register(Wishlist)
 

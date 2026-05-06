@@ -1,0 +1,66 @@
+# Docker Compose configuration for Django ecommerce app
+
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: ecommerce-app
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8000 --workers 4 ecommerce.wsgi:application"
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      - ALLOWED_HOSTS=localhost,127.0.0.1,${ALLOWED_HOSTS:-}
+      - DATABASE_URL=sqlite:///db.sqlite3
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - db
+    networks:
+      - ecommerce-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: ecommerce-db
+    environment:
+      - POSTGRES_DB=ecommerce
+      - POSTGRES_USER=ecommerce_user
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-change-this-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: ecommerce-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/static:ro
+      - media_volume:/app/media:ro
+    depends_on:
+      - web
+    networks:
+      - ecommerce-network
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+
+networks:
+  ecommerce-network:
+    driver: bridge

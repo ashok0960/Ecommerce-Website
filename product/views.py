@@ -14,14 +14,14 @@ def adminDashboard(request):
     from userpage.models import Order
     context = {
         'total_vendors': User.objects.filter(is_staff=True).count(),
-        'total_products': Product.objects.count(),
-        'total_categories': Category.objects.count(),
-        'total_orders': Order.objects.count(),
-        'pending_orders': Order.objects.filter(order_status='In Progress').count(),
-        'completed_orders': Order.objects.filter(order_status='Complete').count(),
-        'recent_products': Product.objects.order_by('-created_at')[:10],
-        'recent_orders': Order.objects.order_by('-created_at')[:10],
-        'orders_to_manage': Order.objects.filter(order_status__in=['In Progress', 'way to deliver']).order_by('-created_at')[:20],
+        'total_products': Product.objects.filter(user=request.user).count(),
+        'total_categories': Category.objects.filter(user=request.user).count(),
+        'total_orders': Order.objects.filter(product__user=request.user).count(),
+        'pending_orders': Order.objects.filter(product__user=request.user, order_status='In Progress').count(),
+        'completed_orders': Order.objects.filter(product__user=request.user, order_status='Complete').count(),
+        'recent_products': Product.objects.filter(user=request.user).order_by('-created_at')[:10],
+        'recent_orders': Order.objects.filter(product__user=request.user).order_by('-created_at')[:10],
+        'orders_to_manage': Order.objects.filter(product__user=request.user, order_status__in=['In Progress', 'way to deliver']).order_by('-created_at')[:20],
     }
     return render(request, 'admin/dashboard.html', context)
 
@@ -155,16 +155,14 @@ def update_order_status(request, order_id):
     try:
         order = Order.objects.get(id=order_id)
 
-        # Check permissions
-        if request.user.is_superuser:
-            # Admin can update any order
+        # Check permissions: only uploader can update their own product orders
+        if request.user.is_superuser and order.product.user == request.user:
             pass
         elif request.user.is_staff and order.product.user == request.user:
-            # Vendor can only update orders for their own products
             pass
         else:
             messages.error(request, 'You do not have permission to update this order.')
-            return redirect(request.META.get('HTTP_REFERER', 'home'))
+            return redirect(request.META.get('HTTP_REFERER', 'manage-orders'))
 
         if request.method == 'POST':
             new_status = request.POST.get('order_status')
@@ -175,7 +173,7 @@ def update_order_status(request, order_id):
             else:
                 messages.error(request, 'Invalid status selected')
 
-        return redirect(request.META.get('HTTP_REFERER', 'home'))
+        return redirect(request.META.get('HTTP_REFERER', 'manage-orders'))
 
     except Order.DoesNotExist:
         messages.error(request, 'Order not found')
@@ -190,9 +188,9 @@ def manage_orders(request):
     from userpage.models import Order
 
     if request.user.is_superuser:
-        # Admin can see all orders
-        orders = Order.objects.all().order_by('-created_at')
-        title = "All Orders Management"
+        # Admin can only see orders for admin-uploaded products
+        orders = Order.objects.filter(product__user=request.user).order_by('-created_at')
+        title = "Admin Product Orders"
     elif request.user.is_staff:
         # Vendor can only see orders for their products
         vendor_products = Product.objects.filter(user=request.user).values_list('id', flat=True)
@@ -215,3 +213,66 @@ def manage_orders(request):
         'is_vendor': request.user.is_staff and not request.user.is_superuser,
     }
     return render(request, 'manage_orders.html', context)
+
+
+@login_required
+def get_pending_orders_count(request):
+    from django.http import JsonResponse
+    from userpage.models import Order
+
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'count': 0}, status=403)
+
+    if request.user.is_superuser:
+        count = Order.objects.filter(
+            product__user=request.user,
+            order_status__in=['In Progress', 'way to deliver']
+        ).count()
+    else:
+        vendor_product_ids = Product.objects.filter(
+            user=request.user
+        ).values_list('id', flat=True)
+        count = Order.objects.filter(
+            product_id__in=vendor_product_ids,
+            order_status__in=['In Progress', 'way to deliver']
+        ).count()
+
+    return JsonResponse({'success': True, 'count': count})
+
+
+@login_required
+def delete_order(request, order_id):
+    from userpage.models import Order
+
+    try:
+        order = Order.objects.get(id=order_id)
+
+        # Check permissions: only uploader can delete their own product orders
+        if request.user.is_superuser and order.product.user == request.user:
+            pass
+        elif request.user.is_staff and order.product.user == request.user:
+            pass
+        else:
+            messages.error(request, 'You do not have permission to delete this order.')
+            return redirect(request.META.get('HTTP_REFERER', 'manage-orders'))
+
+        if request.method == 'POST':
+            order_id_deleted = order.id
+            order_product = order.product.title
+            order.delete()
+            messages.success(request, f'Order #{order_id_deleted} ({order_product}) deleted successfully.')
+            return redirect(request.META.get('HTTP_REFERER', 'manage-orders'))
+        else:
+            # GET request - show confirmation
+            context = {
+                'order': order,
+                'is_admin': request.user.is_superuser,
+            }
+            return render(request, 'order_delete_confirm.html', context)
+
+    except Order.DoesNotExist:
+        messages.error(request, 'Order not found.')
+        return redirect(request.META.get('HTTP_REFERER', 'manage-orders'))
+    except Exception as e:
+        messages.error(request, f'Error deleting order: {str(e)}')
+        return redirect(request.META.get('HTTP_REFERER', 'manage-orders'))

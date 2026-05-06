@@ -9,24 +9,47 @@
 
     <!-- Page Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <h2 class="section-title mb-0">All Products</h2>
+        <div>
+            <h2 class="section-title mb-0">All Products</h2>
+            <small class="text-muted">{{ total_count }} product{{ total_count|pluralize }} found</small>
+        </div>
         <div class="d-flex flex-wrap gap-2">
             <!-- Search -->
             <form method="get" class="d-flex">
-                <input type="text" name="search" placeholder="Search products..." class="form-control" style="width:220px;border-radius:10px 0 0 10px!important" value="{{search_query|default:''}}">
-                {% if selected_category %}<input type="hidden" name="category" value="{{selected_category}}">{% endif %}
-                <button type="submit" class="btn btn-primary" style="border-radius:0 10px 10px 0!important"><i class="bi bi-search"></i></button>
+                <input type="text" name="search" placeholder="Search products..." class="form-control"
+                    style="width:200px;border-radius:10px 0 0 10px!important" value="{{ search_query|default:'' }}">
+                {% if selected_categories %}<input type="hidden" name="category" value="{{ selected_categories }}">{% endif %}
+                {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+                <button type="submit" class="btn btn-primary" style="border-radius:0 10px 10px 0!important">
+                    <i class="bi bi-search"></i>
+                </button>
             </form>
             <!-- Category Filter -->
             <form method="get">
-                {% if search_query %}<input type="hidden" name="search" value="{{search_query}}">{% endif %}
-                <select name="category" class="form-select" style="width:180px" onchange="this.form.submit()">
+                {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+                {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+                <select name="category" class="form-select" style="width:160px" onchange="this.form.submit()">
                     <option value="">All Categories</option>
                     {% for item in categories %}
-                    <option value="{{item.id}}" {% if item.id == selected_categories %}selected{% endif %}>{{item.name}}</option>
+                    <option value="{{ item.id }}" {% if item.id == selected_categories %}selected{% endif %}>{{ item.name }}</option>
                     {% endfor %}
                 </select>
             </form>
+            <!-- Sort -->
+            <form method="get">
+                {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+                {% if selected_categories %}<input type="hidden" name="category" value="{{ selected_categories }}">{% endif %}
+                <select name="sort" class="form-select" style="width:160px" onchange="this.form.submit()">
+                    <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest First</option>
+                    <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                </select>
+            </form>
+            {% if search_query or selected_categories %}
+            <a href="{% url 'products' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-x me-1"></i>Clear
+            </a>
+            {% endif %}
         </div>
     </div>
 
@@ -35,18 +58,21 @@
         {% for item in products %}
         <div class="col">
             <a href="{% url 'productdetails' item.id %}" class="text-decoration-none text-dark">
-                <div class="card shadow-sm">
-                    <div style="overflow:hidden;height:240px;position:relative;">
-                        <img src="{{item.image.url}}" class="w-100 h-100" style="object-fit:cover;transition:transform 0.4s" alt="{{item.title}}">
+                <div class="card shadow-sm h-100">
+                    <div style="overflow:hidden;height:220px;position:relative;">
+                        <img src="{{ item.image.url }}" class="w-100 h-100" style="object-fit:cover;transition:transform 0.4s" alt="{{ item.title }}">
                         {% if item.tag %}
-                        <span class="badge position-absolute top-0 end-0 m-2" style="background:var(--primary)">{{item.tag}}</span>
+                        <span class="badge position-absolute top-0 end-0 m-2" style="background:var(--primary)">{{ item.tag }}</span>
+                        {% endif %}
+                        {% if item.trending %}
+                        <span class="badge position-absolute top-0 start-0 m-2" style="background:var(--accent);color:var(--primary-dark)">🔥 Hot</span>
                         {% endif %}
                     </div>
-                    <div class="card-body">
-                        <h5 class="card-title" title="{{item.title}}">{{item.title|slice:':22'}}{% if item.title|length >= 22 %}...{% endif %}</h5>
-                        <p class="mb-1">
-                            <small class="text-decoration-line-through text-muted">${{item.actual_price}}</small>
-                            <span class="fw-bold ms-1" style="color:var(--success)">${{item.discounted_price}}</span>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" title="{{ item.title }}">{{ item.title|slice:':22' }}{% if item.title|length >= 22 %}...{% endif %}</h5>
+                        <p class="mb-1 mt-auto">
+                            <small class="text-decoration-line-through text-muted">${{ item.actual_price }}</small>
+                            <span class="fw-bold ms-1" style="color:var(--success)">${{ item.discounted_price }}</span>
                         </p>
                         <span style="color:var(--primary);font-size:0.85rem;font-weight:600">View Details →</span>
                     </div>
@@ -55,6 +81,34 @@
         </div>
         {% endfor %}
     </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-5 d-flex justify-content-center">
+        <ul class="pagination gap-1">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link rounded-3" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_categories %}&category={{ selected_categories }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link rounded-3" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_categories %}&category={{ selected_categories }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link rounded-3" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_categories %}&category={{ selected_categories }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
     {% else %}
     <div class="text-center py-5">
         <div style="font-size:4rem">🔍</div>

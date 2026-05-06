@@ -29,12 +29,15 @@ def userLogin(request):
         user = authenticate(request, username = username, password = password)
         if user is not None:
             login(request,user)
-            if user.is_staff:
-                messages.success(request, f"Welcome {user.username}, You are Logged In.")
-                return redirect('all-products')
-            elif user.is_active:
-                messages.success(request, f"Welcome {user.username}, You are Logged In.")
-                return redirect('/')
+            if user.is_superuser:
+                messages.success(request, f"Welcome {user.username}!")
+                return redirect('admin-dashboard')
+            elif user.is_staff:
+                messages.success(request, f"Welcome {user.username}!")
+                return redirect('vendor-dashboard')
+            else:
+                messages.success(request, f"Welcome {user.username}!")
+                return redirect('home')
         else:
             messages.error(request,'User not Found!')
             return render(request,'auth/login.html',{'form':LoginForm})

@@ -27,24 +27,37 @@
                             <td>{{ forloop.counter }}</td>
                             <td>
                                 <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" width="60" height="60" style="border-radius:10px;object-fit:cover">
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}"
+                                         width="60" height="60" style="border-radius:10px;object-fit:cover">
                                     <div>
-                                        <div class="fw-600" style="font-size:0.95rem">{{ item.product.title|slice:':30' }}</div>
+                                        <div style="font-weight:600;font-size:0.95rem">{{ item.product.title|slice:':30' }}</div>
                                         <small class="text-muted">{{ item.product.category }}</small>
+                                        {% if item.product.stock <= 0 %}
+                                        <br><small class="text-danger">Out of stock</small>
+                                        {% elif item.product.stock <= 5 %}
+                                        <br><small class="text-warning">Only {{ item.product.stock }} left</small>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <span class="fw-bold" style="color:var(--success)">${{ item.product.discounted_price }}</span>
+                                <span style="font-weight:700;color:var(--success)">${{ item.product.discounted_price }}</span>
+                                {% if item.product.actual_price != item.product.discounted_price %}
+                                <br><small class="text-decoration-line-through text-muted">${{ item.product.actual_price }}</small>
+                                {% endif %}
                             </td>
                             <td>
                                 <div class="d-flex gap-2">
                                     <button onclick="confirmDelete({{ item.id }})" class="btn btn-danger btn-sm">
                                         <i class="bi bi-trash"></i>
                                     </button>
-                                    <a href="/orderitem/{{ item.id }}/{{item.product.id}}" class="btn btn-primary btn-sm">
-                                        Buy Now
+                                    {% if item.product.stock > 0 %}
+                                    <a href="{% url 'orderitem' item.id item.product.id %}" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-bag-check me-1"></i>Buy Now
                                     </a>
+                                    {% else %}
+                                    <button class="btn btn-secondary btn-sm" disabled>Out of Stock</button>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
@@ -55,19 +68,27 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="bg-white rounded-4 shadow-sm p-4">
+            <div class="bg-white rounded-4 shadow-sm p-4 sticky-top" style="top:90px">
                 <h5 class="fw-bold mb-3">Order Summary</h5>
                 <div class="d-flex justify-content-between mb-2 text-muted">
-                    <span>Items ({{cartitems|length}})</span>
-                    <span>—</span>
+                    <span>Items ({{ cartitems|length }})</span>
+                    <span>${{ total }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 text-muted">
+                    <span>Shipping</span>
+                    <span class="text-success">Free</span>
                 </div>
                 <hr>
-                <div class="d-flex justify-content-between fw-bold mb-3">
+                <div class="d-flex justify-content-between fw-bold mb-3 fs-5">
                     <span>Total</span>
-                    <span style="color:var(--primary)">Calculated at checkout</span>
+                    <span style="color:var(--primary)">${{ total }}</span>
                 </div>
-                <a href="{% url 'products' %}" class="btn btn-outline-success w-100 mb-2">
+                <a href="{% url 'products' %}" class="btn btn-outline-primary w-100 mb-2"
+                   style="color:var(--primary)!important;border-color:var(--primary)!important">
                     <i class="bi bi-plus me-1"></i>Add More Items
+                </a>
+                <a href="{% url 'wishlist' %}" class="btn btn-outline-danger w-100">
+                    <i class="bi bi-heart me-1"></i>View Wishlist
                 </a>
             </div>
         </div>
@@ -86,7 +107,7 @@
 
 {% block script %}
 <script>
-    const confirmDelete = (id) => {
+    function confirmDelete(id) {
         Swal.fire({
             title: "Remove item?",
             text: "This item will be removed from your cart.",
@@ -95,9 +116,7 @@
             confirmButtonColor: '#ef4444',
             confirmButtonText: "Remove",
         }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/deletecart/${id}`;
-            }
+            if (result.isConfirmed) window.location.href = `/deletecart/${id}`;
         });
     }
 </script>

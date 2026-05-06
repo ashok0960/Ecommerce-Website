@@ -35,8 +35,10 @@ class Order(models.Model):
              ('way to deliver','way to deliver'),
              ('Complete','complete'))
     PAYMENTS=(('COD','COD'),
-              ('Card','Card'))
-    
+              ('Card','Card (Stripe)'),
+              ('Khalti','Khalti'),
+              ('Daraja','Daraja (M-Pesa)'))
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
@@ -47,7 +49,25 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=20, choices=PAYMENTS)
     payment_status = models.CharField(default=False,null=True)
     order_status = models.CharField(max_length=20, choices=STATUS,default='In Progress')
+    transaction_id = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.user.username}"
+
+    def can_delete(self):
+        """Check if order can be deleted by user"""
+        # Users can delete unpaid orders only
+        if self.payment_status == False or self.payment_status == 'False':
+            return True
+        return False
+
+    def is_paid(self):
+        """Check if order is paid"""
+        return self.payment_status == True or self.payment_status == 'True'
 
 
 class Contact(models.Model):
@@ -59,6 +79,18 @@ class Contact(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.subject}"
+
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.title}"
 
     def __str__(self):
         return f"{ self.user.username}-{self.product.title}"

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}My Profile{% endblock %}
+
+{% block main-content %}
+{% include "components/messages.html" %}
+<div class="container my-5">
+
+    <!-- Profile Header -->
+    <div class="rounded-4 p-4 mb-4 text-white" style="background:linear-gradient(135deg,#2c1200,#6f4901,#a06a10)">
+        <div class="d-flex align-items-center gap-4">
+            <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:2.2rem;border:3px solid rgba(255,255,255,0.4)">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-1">{{ user.username }}</h3>
+                <p class="mb-0" style="opacity:0.8"><i class="bi bi-envelope me-2"></i>{{ user.email|default:"No email set" }}</p>
+                <p class="mb-0" style="opacity:0.7;font-size:0.85rem">
+                    <i class="bi bi-calendar me-2"></i>Member since {{ user.date_joined|date:"M Y" }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="bg-white rounded-4 p-3 text-center shadow-sm border">
+                <div style="font-size:1.8rem;font-weight:800;color:var(--primary)">{{ total_orders }}</div>
+                <div class="text-muted small">Total Orders</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bg-white rounded-4 p-3 text-center shadow-sm border">
+                <div style="font-size:1.8rem;font-weight:800;color:var(--success)">{{ completed }}</div>
+                <div class="text-muted small">Completed</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bg-white rounded-4 p-3 text-center shadow-sm border">
+                <div style="font-size:1.8rem;font-weight:800;color:var(--accent)">{{ pending }}</div>
+                <div class="text-muted small">In Progress</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bg-white rounded-4 p-3 text-center shadow-sm border">
+                <div style="font-size:1.8rem;font-weight:800;color:#ef4444">{{ wishlist_count }}</div>
+                <div class="text-muted small">Wishlist Items</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <a href="{% url 'my-orders' %}" class="btn btn-primary w-100 py-3 rounded-4">
+                <i class="bi bi-bag-check d-block mb-1" style="font-size:1.4rem"></i>My Orders
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'wishlist' %}" class="btn btn-outline-danger w-100 py-3 rounded-4">
+                <i class="bi bi-heart d-block mb-1" style="font-size:1.4rem"></i>Wishlist
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'cart' %}" class="btn btn-outline-primary w-100 py-3 rounded-4" style="color:var(--primary)!important;border-color:var(--primary)!important">
+                <i class="bi bi-cart3 d-block mb-1" style="font-size:1.4rem"></i>My Cart
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'contact' %}" class="btn btn-outline-secondary w-100 py-3 rounded-4">
+                <i class="bi bi-headset d-block mb-1" style="font-size:1.4rem"></i>Support
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="bg-white rounded-4 shadow-sm p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0" style="color:var(--primary)">Recent Orders</h5>
+            <a href="{% url 'my-orders' %}" class="btn btn-sm btn-outline-primary" style="color:var(--primary)!important;border-color:var(--primary)!important">View All</a>
+        </div>
+        {% if orders %}
+        <div class="table-responsive">
+            <table class="cart-table w-100">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="{{ order.product.image.url }}" width="40" height="40" style="border-radius:8px;object-fit:cover">
+                                <span style="font-size:0.9rem;font-weight:600">{{ order.product.title|slice:':20' }}</span>
+                            </div>
+                        </td>
+                        <td class="fw-bold" style="color:var(--success)">${{ order.total_price }}</td>
+                        <td><span class="badge" style="background:rgba(111,73,1,0.1);color:var(--primary)">{{ order.payment_method }}</span></td>
+                        <td>
+                            {% if order.order_status == "Complete" %}
+                            <span class="badge" style="background:rgba(16,185,129,0.15);color:var(--success)">✅ Done</span>
+                            {% elif order.order_status == "way to deliver" %}
+                            <span class="badge" style="background:rgba(59,130,246,0.15);color:#1d4ed8">🚚 On Way</span>
+                            {% else %}
+                            <span class="badge" style="background:rgba(245,166,35,0.15);color:#b45309">⏳ In Progress</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted" style="font-size:0.85rem">{{ order.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <div style="font-size:3rem">📦</div>
+            <p class="text-muted mt-2">No orders yet. <a href="{% url 'products' %}" style="color:var(--primary)">Start shopping!</a></p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

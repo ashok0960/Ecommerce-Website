@@ -76,7 +76,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'userpage.generals.setting'
+                'userpage.generals.setting',
+                'product.context_processors.pending_orders_context',
             ],
         },
     },
@@ -132,7 +133,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_URL = 'login'
 
@@ -148,4 +152,19 @@ DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER', 'ashokkarki6677@gmail.com
 # Stripe Settings
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', '')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
-STRIPE_CURRENCY = 'usd'
+STRIPE_CURRENCY = 'npr'
+
+# Khalti Settings
+KHALTI_PUBLIC_KEY = os.environ.get('KHALTI_PUBLIC_KEY', '')
+KHALTI_SECRET_KEY = os.environ.get('KHALTI_SECRET_KEY', '')
+KHALTI_API_URL = 'https://khalti.com/api/v2/'
+
+# Daraja (M-Pesa) Settings
+DARAJA_CONSUMER_KEY = os.environ.get('DARAJA_CONSUMER_KEY', '')
+DARAJA_CONSUMER_SECRET = os.environ.get('DARAJA_CONSUMER_SECRET', '')
+DARAJA_BUSINESS_SHORTCODE = os.environ.get('DARAJA_BUSINESS_SHORTCODE', '')
+DARAJA_PASSKEY = os.environ.get('DARAJA_PASSKEY', '')
+
+# Currency Settings
+CURRENCY = 'NPR'
+CURRENCY_SYMBOL = 'Rs.'
